@@ -2,14 +2,15 @@ set flavor [lindex $argv 0]
 set case [lindex $argv 1]
 
 set ns [new Simulator]
-set nf [open out.nam w]
-$ns namtrace-all $nf
+set file "out_$flavor$case"
+#set nf [open "$file.nam" w]
+#$ns namtrace-all $nf
 
 proc finish {} {
         global ns nf
-        $ns flush-trace
-        close $nf
-        exec nam out.nam &
+#       $ns flush-trace
+#        close $nf
+#        exec nam out.nam &
         exit 0
 }
 
@@ -23,9 +24,9 @@ set rcv2 [$ns node]
 global flav, delay
 
 switch $case {
-	1 {set delay "3.75ms"}
-	2 {set delay "7.5ms"}
-	3 {set delay "11.25ms"}
+	1 {set delay "12.5ms"}
+	2 {set delay "20ms"}
+	3 {set delay "27.5ms"}
 }
 
 switch $flavor {
@@ -38,10 +39,10 @@ $ns attach-agent $src1 $tcp1
 set tcp2 [new Agent/TCP/$flav]
 $ns attach-agent $src2 $tcp2
 
-$ns duplex-link $src1 $r1 10Mb 0ms DropTail
+$ns duplex-link $src1 $r1 10Mb 5ms DropTail
 $ns duplex-link $src2 $r1 10Mb $delay DropTail
 $ns duplex-link $r1 $r2 1Mb 5ms DropTail
-$ns duplex-link $r2 $rcv1 10Mb 0ms DropTail
+$ns duplex-link $r2 $rcv1 10Mb 5ms DropTail
 $ns duplex-link $r2 $rcv2 10Mb $delay DropTail
 
 $ns duplex-link-op $src1 $r1 orient right-down
@@ -73,7 +74,10 @@ $ns at 400 "$ftp2 stop"
 
 $ns at 400 "finish"
 
-set trace_file [open  "out.tr"  w]
-$ns trace-queue  $src1  $r1  $trace_file
+set tfile1 [open "$file-S1.tr" w]
+$ns trace-queue  $src1  $r1  $tfile1
+
+set tfile2 [open "$file-S2.tr" w]
+$ns trace-queue  $src2  $r1  $tfile2
 
 $ns run
